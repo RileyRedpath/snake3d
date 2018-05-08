@@ -3,10 +3,9 @@
 exports.__esModule = true;
 var Snake = /** @class */ (function () {
     function Snake() {
-        this.positions = [new Coordinate(2, 2)];
+        this.positions = [new Coordinate(2, 2, 2)];
     }
     Snake.prototype.nextHead = function (direction) {
-        console.log("length" + this.positions.length);
         return direction.findAdjCoord(this.positions[0]);
     };
     Snake.prototype.move = function (direction, eating) {
@@ -24,30 +23,35 @@ var Snake = /** @class */ (function () {
 }());
 var Apple = /** @class */ (function () {
     function Apple() {
-        this.position = new Coordinate(Math.round(Math.random() * 47), Math.round(Math.random() * 26));
+        this.position = new Coordinate(Math.round(Math.random() * 47), Math.round(Math.random() * 26), Math.round(Math.random() * 3));
     }
     return Apple;
 }());
 var Coordinate = /** @class */ (function () {
-    function Coordinate(_x, _y) {
+    function Coordinate(_x, _y, _z) {
         this.x = _x;
         this.y = _y;
+        this.z = _z;
     }
     Coordinate.prototype.eq = function (other) {
-        return this.x == other.x && this.y == other.y;
+        return this.x == other.x && this.y == other.y && this.z == other.z;
     };
     return Coordinate;
 }());
 var Direction = /** @class */ (function () {
-    function Direction(_x, _y) {
+    function Direction(_x, _y, _z) {
         this.x = _x;
         this.y = _y;
+        this.z = _z;
     }
     Direction.prototype.findAdjCoord = function (coord) {
-        return new Coordinate(((coord.x + this.x) % 48 + 48) % 48, ((coord.y + this.y) % 27 + 27) % 27);
+        function mod(n, modulus) {
+            return (n % modulus + modulus) % modulus;
+        }
+        return new Coordinate(mod(coord.x + this.x, 48), mod(coord.y + this.y, 27), mod(coord.z + this.z, 4));
     };
     Direction.prototype.perpendicular = function (other) {
-        return (this.x * other.getX() + this.y * other.getY()) == 0;
+        return (this.x * other.getX() + this.y * other.getY() + this.z * other.getZ()) == 0;
     };
     Direction.prototype.getX = function () {
         return this.x;
@@ -55,10 +59,15 @@ var Direction = /** @class */ (function () {
     Direction.prototype.getY = function () {
         return this.y;
     };
-    Direction.NORTH = new Direction(0, -1);
-    Direction.EAST = new Direction(1, 0);
-    Direction.SOUTH = new Direction(0, 1);
-    Direction.WEST = new Direction(-1, 0);
+    Direction.prototype.getZ = function () {
+        return this.z;
+    };
+    Direction.NORTH = new Direction(0, -1, 0);
+    Direction.EAST = new Direction(1, 0, 0);
+    Direction.SOUTH = new Direction(0, 1, 0);
+    Direction.WEST = new Direction(-1, 0, 0);
+    Direction.IN = new Direction(0, 0, -1);
+    Direction.OUT = new Direction(0, 0, 1);
     return Direction;
 }());
 exports.Direction = Direction;
@@ -73,7 +82,6 @@ var GameState = /** @class */ (function () {
         this.currentMove = this.movementQueue.length == 0 ? this.currentMove : this.movementQueue.pop();
         var nextHead = this.snake.nextHead(this.currentMove);
         if (this.snake.crash(nextHead)) {
-            console.log("reset..");
             this.snake = new Snake();
             this.apple = new Apple();
             this.movementQueue = [];
@@ -102,30 +110,33 @@ var snake_2 = require("./snake");
 var state = new snake_1.GameState();
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
+var zBright = 64;
 var draw = function () {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
-    function x(c) { return Math.round(c * canvas.width / 48); }
-    ;
-    function y(r) { return Math.round(r * canvas.height / 27); }
-    ;
+    var rectX = Math.round(canvas.width / 48);
+    var rectY = Math.round(canvas.height / 27);
     // clear
     ctx.fillStyle = '#232323';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // draw snake
-    ctx.fillStyle = 'rgb(0,200,50)';
-    state.snake.positions.map(function (p) { return ctx.fillRect(x(p.x), y(p.y), x(1), y(1)); });
-    // draw apples
-    ctx.fillStyle = 'rgb(255,50,0)';
-    ctx.fillRect(x(state.apple.position.x), y(state.apple.position.y), x(1), y(1));
-    // add crash
-    if (state.snake.positions.length == 0) {
-        ctx.fillStyle = 'rgb(255,0,0)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    var drawnXY = [];
+    for (var i = 0; i < 4; i++) {
+        ctx.fillStyle = 'rgb(0,' + zBright * i + ',50)';
+        state.snake.positions.forEach(function (p) {
+            if (p.z == i) {
+                ctx.fillRect(rectX * p.x, rectY * p.y, rectX, rectY);
+            }
+        });
+        // draw apples
+        if (state.apple.position.z == i) {
+            ctx.fillStyle = 'rgb(' + zBright * i + ',50, 0)';
+            ctx.fillRect(rectX * state.apple.position.x, rectY * state.apple.position.y, rectX, rectY);
+        }
     }
 };
 var step = function (t1) { return function (t2) {
-    if (t2 - t1 > 100) {
+    if (t2 - t1 > 150) {
         state.update();
         draw();
         window.requestAnimationFrame(step(t2));
@@ -147,6 +158,12 @@ window.addEventListener('keydown', function (k) {
             break;
         case 'a':
             state.queueDirection(snake_2.Direction.WEST);
+            break;
+        case 'e':
+            state.queueDirection(snake_2.Direction.IN);
+            break;
+        case 'q':
+            state.queueDirection(snake_2.Direction.OUT);
             break;
     }
 });

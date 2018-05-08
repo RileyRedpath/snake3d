@@ -5,30 +5,33 @@ var snake_2 = require("./snake");
 var state = new snake_1.GameState();
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
+var zBright = 64;
 var draw = function () {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
-    function x(c) { return Math.round(c * canvas.width / 48); }
-    ;
-    function y(r) { return Math.round(r * canvas.height / 27); }
-    ;
+    var rectX = Math.round(canvas.width / 48);
+    var rectY = Math.round(canvas.height / 27);
     // clear
     ctx.fillStyle = '#232323';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // draw snake
-    ctx.fillStyle = 'rgb(0,200,50)';
-    state.snake.positions.map(function (p) { return ctx.fillRect(x(p.x), y(p.y), x(1), y(1)); });
-    // draw apples
-    ctx.fillStyle = 'rgb(255,50,0)';
-    ctx.fillRect(x(state.apple.position.x), y(state.apple.position.y), x(1), y(1));
-    // add crash
-    if (state.snake.positions.length == 0) {
-        ctx.fillStyle = 'rgb(255,0,0)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    var drawnXY = [];
+    for (var i = 0; i < 4; i++) {
+        ctx.fillStyle = 'rgb(0,' + zBright * i + ',50)';
+        state.snake.positions.forEach(function (p) {
+            if (p.z == i) {
+                ctx.fillRect(rectX * p.x, rectY * p.y, rectX, rectY);
+            }
+        });
+        // draw apples
+        if (state.apple.position.z == i) {
+            ctx.fillStyle = 'rgb(' + zBright * i + ',50, 0)';
+            ctx.fillRect(rectX * state.apple.position.x, rectY * state.apple.position.y, rectX, rectY);
+        }
     }
 };
 var step = function (t1) { return function (t2) {
-    if (t2 - t1 > 100) {
+    if (t2 - t1 > 150) {
         state.update();
         draw();
         window.requestAnimationFrame(step(t2));
@@ -50,6 +53,12 @@ window.addEventListener('keydown', function (k) {
             break;
         case 'a':
             state.queueDirection(snake_2.Direction.WEST);
+            break;
+        case 'e':
+            state.queueDirection(snake_2.Direction.IN);
+            break;
+        case 'q':
+            state.queueDirection(snake_2.Direction.OUT);
             break;
     }
 });
