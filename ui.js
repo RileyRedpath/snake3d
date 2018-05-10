@@ -2,21 +2,22 @@
 exports.__esModule = true;
 var snake_1 = require("./snake");
 var snake_2 = require("./snake");
+var snake_3 = require("./snake");
 var state = new snake_1.GameState();
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
-var zBright = 64;
+var zBright = Math.floor(255 / snake_3.Constants.Z_TILES);
 var draw = function () {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
-    var rectX = Math.round(canvas.width / 48);
-    var rectY = Math.round(canvas.height / 27);
+    var rectX = Math.round(canvas.width / snake_3.Constants.X_TILES);
+    var rectY = Math.round(canvas.height / snake_3.Constants.Y_TILES);
     // clear
     ctx.fillStyle = '#232323';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // draw snake
     var drawnXY = [];
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < snake_3.Constants.Z_TILES; i++) {
         ctx.fillStyle = 'rgb(0,' + zBright * i + ',50)';
         state.snake.positions.forEach(function (p) {
             if (p.z == i) {
@@ -31,7 +32,7 @@ var draw = function () {
     }
 };
 var step = function (t1) { return function (t2) {
-    if (t2 - t1 > 150) {
+    if (t2 - t1 > snake_3.Constants.GAME_SPEED) {
         state.update();
         draw();
         window.requestAnimationFrame(step(t2));

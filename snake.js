@@ -22,7 +22,7 @@ var Snake = /** @class */ (function () {
 }());
 var Apple = /** @class */ (function () {
     function Apple() {
-        this.position = new Coordinate(Math.round(Math.random() * 47), Math.round(Math.random() * 26), Math.round(Math.random() * 3));
+        this.position = new Coordinate(Math.round(Math.random() * (Constants.X_TILES - 1)), Math.round(Math.random() * (Constants.Y_TILES - 1)), Math.round(Math.random() * (Constants.Z_TILES - 1)));
     }
     return Apple;
 }());
@@ -47,7 +47,7 @@ var Direction = /** @class */ (function () {
         function mod(n, modulus) {
             return (n % modulus + modulus) % modulus;
         }
-        return new Coordinate(mod(coord.x + this.x, 48), mod(coord.y + this.y, 27), mod(coord.z + this.z, 4));
+        return new Coordinate(mod(coord.x + this.x, Constants.X_TILES), mod(coord.y + this.y, Constants.Y_TILES), mod(coord.z + this.z, Constants.Z_TILES));
     };
     Direction.prototype.perpendicular = function (other) {
         return (this.x * other.getX() + this.y * other.getY() + this.z * other.getZ()) == 0;
@@ -100,3 +100,13 @@ var GameState = /** @class */ (function () {
     return GameState;
 }());
 exports.GameState = GameState;
+var Constants = /** @class */ (function () {
+    function Constants() {
+    }
+    Constants.X_TILES = 16;
+    Constants.Y_TILES = 9;
+    Constants.Z_TILES = 4;
+    Constants.GAME_SPEED = 400;
+    return Constants;
+}());
+exports.Constants = Constants;

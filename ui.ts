@@ -1,18 +1,19 @@
 import { GameState } from './snake';
 import { Direction } from './snake';
+import { Constants } from './snake';
 
 var state = new GameState();
 
 const canvas = <HTMLCanvasElement>document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const zBright = 64
+const zBright = Math.floor(255/Constants.Z_TILES)
 
 const draw = () => {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
 
-    var rectX = Math.round(canvas.width / 48);
-    var rectY = Math.round(canvas.height / 27);
+    var rectX = Math.floor(canvas.width / Constants.X_TILES);
+    var rectY = Math.floor(canvas.height / Constants.Y_TILES);
 
     // clear
     ctx.fillStyle = '#232323'
@@ -20,8 +21,8 @@ const draw = () => {
 
     // draw snake
     var drawnXY = [];
-    for (var i = 0; i < 4; i++) {
-        ctx.fillStyle = 'rgb(0,' + zBright * i + ',50)';
+    for (var i = 0; i < Constants.Z_TILES; i++) {
+        ctx.fillStyle = 'rgb(0,' + zBright*i + ',50)';
         state.snake.positions.forEach(
             p => {
                 if (p.z == i) {
@@ -35,7 +36,7 @@ const draw = () => {
 
         // draw apples
         if (state.apple.position.z == i) {
-            ctx.fillStyle = 'rgb(' + zBright * i + ',50, 0)';
+            ctx.fillStyle = 'rgb(' + zBright*i + ',50, 0)';
             ctx.fillRect(
                 rectX * state.apple.position.x,
                 rectY * state.apple.position.y,
@@ -46,7 +47,7 @@ const draw = () => {
 }
 
 const step = t1 => t2 => {
-    if (t2 - t1 > 150) {
+    if (t2 - t1 > Constants.GAME_SPEED) {
         state.update()
         draw()
         window.requestAnimationFrame(step(t2))

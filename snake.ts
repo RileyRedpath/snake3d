@@ -28,9 +28,9 @@ class Apple {
 
     constructor() {
         this.position = new Coordinate(
-            Math.round(Math.random()*47), 
-            Math.round(Math.random()*26),
-            Math.round(Math.random()*3),
+            Math.round(Math.random()*(Constants.X_TILES - 1)), 
+            Math.round(Math.random()*(Constants.Y_TILES - 1)),
+            Math.round(Math.random()*(Constants.Z_TILES - 1)),
         );
     }
 }
@@ -74,9 +74,9 @@ export class Direction {
             return (n%modulus + modulus)%modulus;
         }
         return new Coordinate(
-            mod(coord.x + this.x, 48),
-            mod(coord.y + this.y, 27),
-            mod(coord.z + this.z, 4)
+            mod(coord.x + this.x, Constants.X_TILES),
+            mod(coord.y + this.y, Constants.Y_TILES),
+            mod(coord.z + this.z, Constants.Z_TILES)
         );
     }
 
@@ -133,4 +133,11 @@ export class GameState {
             this.movementQueue.unshift(direction);
         }
     }
+}
+
+export class Constants{
+    public static X_TILES = 16;
+    public static Y_TILES = 9;
+    public static Z_TILES = 4;
+    public static GAME_SPEED = 400;
 }
